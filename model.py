@@ -184,27 +184,33 @@ class DecoderBlock(nn.Module):
         self.self_attention_block = self_attention_block
         self.cross_attention_block = cross_attention_block
         self.feed_forward_block = feed_forward_block
-        self.residual_connections = nn.ModuleList([ResidualConnection(features, dropout) for _ in range(3)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(features, dropout) for _ in range(3)]) # three sublayers in the decoder block
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
-        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, tgt_mask))
-        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
-        x = self.residual_connections[2](x, self.feed_forward_block)
+        """
+        x is the input to the decoder block, 
+        encoder_output is the output of the encoder, 
+        src_mask is the mask for the source sequence applied to the encoder (translating from English (source language)), 
+        tgt_mask is the mask for the target sequence applied to the decoder (to Arabic (target language))
+        """
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, tgt_mask)) # self-attention sublayer of the decoder 
+        x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask)) # cross-attention sublayer of the decoder
+        x = self.residual_connections[2](x, self.feed_forward_block) # feed-forward sublayer of the decoder
         return x
     
 class Decoder(nn.Module):
 
     def __init__(self, features: int, layers: nn.ModuleList) -> None:
         super().__init__()
-        self.layers = layers
-        self.norm = LayerNormalization(features)
+        self.layers = layers # list of decoder blocks
+        self.norm = LayerNormalization(features)   # final layer normalization
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         for layer in self.layers:
             x = layer(x, encoder_output, src_mask, tgt_mask)
         return self.norm(x)
 
-class ProjectionLayer(nn.Module):
+class ProjectionLayer(nn.Module): # called the projection layer because it's projecting the embedding layer into the vocabulary space
 
     def __init__(self, d_model, vocab_size) -> None:
         super().__init__()
@@ -228,9 +234,9 @@ class Transformer(nn.Module):
 
     def encode(self, src, src_mask):
         # (batch, seq_len, d_model)
-        src = self.src_embed(src)
-        src = self.src_pos(src)
-        return self.encoder(src, src_mask)
+        src = self.src_embed(src) # source embedding
+        src = self.src_pos(src) # source positional encoding
+        return self.encoder(src, src_mask)  # encode the source sequence
     
     def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
         # (batch, seq_len, d_model)
@@ -240,14 +246,15 @@ class Transformer(nn.Module):
     
     def project(self, x):
         # (batch, seq_len, vocab_size)
-        return self.projection_layer(x)
+        return self.projection_layer(x) # we take from the embedding to the vocabulary size 
     
+# Build a function to connect all the previous classes, we will use the same numbers that were mentioned on the paper
 def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int, d_model: int=512, N: int=6, h: int=8, dropout: float=0.1, d_ff: int=2048) -> Transformer:
     # Create the embedding layers
     src_embed = InputEmbeddings(d_model, src_vocab_size)
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
 
-    # Create the positional encoding layers
+    # Create the positional encoding layers, we don't need to create two positional encoding layers because actually they do the same job but to be more clear we will create two different layers
     src_pos = PositionalEncoding(d_model, src_seq_len, dropout)
     tgt_pos = PositionalEncoding(d_model, tgt_seq_len, dropout)
     
