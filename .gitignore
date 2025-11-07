@@ -71,6 +71,11 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Jekyll documentation
+docs/_site/
+docs/.jekyll-cache/
+.jekyll-metadata
+
 # PyBuilder
 .pybuilder/
 target/
@@ -214,3 +219,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project-specific
+# Data and model weights
+data/raw/*
+data/weights/*
+!data/weights/.gitkeep
+!data/raw/.gitkeep
+
+# Logs and runs
+logs/
+runs/
+mlruns/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -31,7 +31,7 @@ class BilingualDataset(Dataset):
         dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
 
         # Add sos, eos and padding to each sentence
-        enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2  # We will add <s> and </s>
+        enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2  # We will add <s> and </s> which means how many padding tokens we need to reach the sequence length
         # We will only add <s>, and </s> only on the label
         dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) - 1
 
@@ -39,6 +39,8 @@ class BilingualDataset(Dataset):
         if enc_num_padding_tokens < 0 or dec_num_padding_tokens < 0:
             raise ValueError("Sentence is too long")
 
+# We will build the two tensors: encoder_input and decoder_input
+# So one input will be sent to the encoder and the other to the decoder
         # Add <s> and </s> token
         encoder_input = torch.cat(
             [
@@ -50,7 +52,7 @@ class BilingualDataset(Dataset):
             dim=0,
         )
 
-        # Add only <s> token
+        # Add EOS to the label (what we expect as output from the decoder)
         decoder_input = torch.cat(
             [
                 self.sos_token,
@@ -70,7 +72,7 @@ class BilingualDataset(Dataset):
             dim=0,
         )
 
-        # Double check the size of the tensors to make sure they are all seq_len long
+        # Double check the size of the tensors to make sure they are all seq_len long (just for debugging)
         assert encoder_input.size(0) == self.seq_len
         assert decoder_input.size(0) == self.seq_len
         assert label.size(0) == self.seq_len
@@ -78,13 +80,18 @@ class BilingualDataset(Dataset):
         return {
             "encoder_input": encoder_input,  # (seq_len)
             "decoder_input": decoder_input,  # (seq_len)
+
+            # We don't want these padding tokens to participate in the self-attention mechanism
+            # So we will create a mask that will mask these tokens to be unseen for the self-attention mechanism
             "encoder_mask": (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int(), # (1, 1, seq_len)
             "decoder_mask": (decoder_input != self.pad_token).unsqueeze(0).int() & causal_mask(decoder_input.size(0)), # (1, seq_len) & (1, seq_len, seq_len),
+
             "label": label,  # (seq_len)
             "src_text": src_text,
             "tgt_text": tgt_text,
         }
-    
+
+# in the diagonal of the tensor we need to get all the values that lies above it and set any other value to 0
 def causal_mask(size):
     mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
     return mask == 0
