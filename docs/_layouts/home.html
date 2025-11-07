@@ -21,6 +21,9 @@
       <nav>
         <a href="{{ site.github.repository_url }}" target="_blank">GitHub</a>
         <a href="https://arxiv.org/abs/1706.03762" target="_blank">Paper</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span id="theme-icon">☀️</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -34,5 +37,48 @@
       <p>Implemented by <a href="https://ayanexus.dev" target="_blank">AyaNexus</a> 🦢</p>
     </div>
   </footer>
+
+  <script>
+    // Theme management
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const html = document.documentElement;
+
+    // Check for saved theme preference or default to system preference
+    const getPreferredTheme = () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        return savedTheme;
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    // Set theme
+    const setTheme = (theme) => {
+      html.setAttribute('data-theme', theme);
+      themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    };
+
+    // Toggle theme
+    const toggleTheme = () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    };
+
+    // Initialize theme on page load
+    setTheme(getPreferredTheme());
+
+    // Listen for theme toggle clicks
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  </script>
 </body>
 </html>
