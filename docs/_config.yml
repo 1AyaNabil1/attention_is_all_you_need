@@ -1,6 +1,5 @@
 title: Attention Is All You Need - PyTorch Implementation
 description: A clean PyTorch implementation of the Transformer model
-theme: jekyll-theme-cayman
 show_downloads: false
 github:
   is_project_page: true
@@ -13,10 +12,6 @@ exclude:
   - Gemfile.lock
   - README.md
   - SETUP.md
-  - architecture.md
-  - training.md
-  - api.md
-  - examples.md
 
 # Build settings
 markdown: kramdown
@@ -25,3 +20,12 @@ highlighter: rouge
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+
+# Relative links settings
+relative_links:
+  enabled: true
+  collections: false
