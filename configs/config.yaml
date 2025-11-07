@@ -1,0 +1,108 @@
+# Transformer Training Configuration
+# Configuration for training the "Attention Is All You Need" Transformer model
+
+# Training Parameters
+training:
+  batch_size: 8                    # Number of samples per batch
+  num_epochs: 20                   # Total training epochs
+  lr: 0.0001                       # Learning rate (1e-4)
+  gradient_accumulation_steps: 1   # Steps to accumulate gradients
+  warmup_steps: 4000              # Learning rate warmup steps
+  max_grad_norm: 1.0              # Gradient clipping threshold
+
+# Model Architecture
+model:
+  d_model: 512                    # Model dimension (embedding size)
+  N: 6                            # Number of encoder/decoder layers
+  h: 8                            # Number of attention heads
+  d_ff: 2048                      # Feed-forward network dimension
+  dropout: 0.1                    # Dropout probability
+  seq_len: 350                    # Maximum sequence length
+
+# Dataset Configuration
+dataset:
+  name: 'opus_books'              # Dataset name from HuggingFace
+  lang_src: 'en'                  # Source language (English)
+  lang_tgt: 'fr'                  # Target language (French)
+  train_split: 0.9                # Training data percentage
+  val_split: 0.1                  # Validation data percentage
+  cache_dir: null                 # Optional: cache directory for dataset
+
+# Tokenizer Configuration
+tokenizer:
+  type: 'WordLevel'               # Tokenizer type
+  min_frequency: 2                # Minimum token frequency
+  special_tokens:                 # Special tokens for tokenization
+    - '[UNK]'                     # Unknown token
+    - '[PAD]'                     # Padding token
+    - '[SOS]'                     # Start of sentence
+    - '[EOS]'                     # End of sentence
+  file_pattern: 'tokenizer_{0}.json'  # Tokenizer file naming pattern
+
+# Paths and File Management
+paths:
+  model_folder: 'weights'         # Directory to save model weights
+  model_basename: 'tmodel_'       # Prefix for model checkpoint files
+  experiment_name: 'runs/tmodel'  # TensorBoard experiment directory
+  preload: 'latest'               # Checkpoint to load ('latest', epoch number, or null)
+
+# Training Options
+options:
+  use_amp: false                  # Use automatic mixed precision
+  use_cuda: true                  # Enable CUDA if available
+  use_mps: true                   # Enable MPS (Apple Silicon) if available
+  num_workers: 4                  # DataLoader workers
+  pin_memory: true                # Pin memory for faster data transfer
+  persistent_workers: false       # Keep workers alive between epochs
+
+# Validation Configuration
+validation:
+  num_examples: 2                 # Number of validation examples to display
+  run_every_n_epochs: 1           # Run validation every N epochs
+
+# Loss Configuration
+loss:
+  label_smoothing: 0.1            # Label smoothing factor
+  ignore_index: null              # Index to ignore (set to PAD token id)
+
+# Optimizer Configuration
+optimizer:
+  type: 'Adam'                    # Optimizer type
+  betas: [0.9, 0.98]             # Beta parameters for Adam
+  eps: 1e-9                       # Epsilon for numerical stability
+
+# Logging Configuration
+logging:
+  log_interval: 100               # Log every N batches
+  save_interval: 1                # Save checkpoint every N epochs
+  tensorboard_enabled: true       # Enable TensorBoard logging
+  console_log_level: 'INFO'       # Console logging level
+
+# Evaluation Metrics
+metrics:
+  - 'BLEU'                        # BLEU score
+  - 'CER'                         # Character Error Rate
+  - 'WER'                         # Word Error Rate
+
+# Inference Configuration
+inference:
+  max_length: 512                 # Maximum generation length
+  beam_size: 1                    # Beam size (1 = greedy decoding)
+  temperature: 1.0                # Sampling temperature
+  top_k: 50                       # Top-k sampling
+  top_p: 1.0                      # Nucleus sampling threshold
+
+# Hardware Configuration
+hardware:
+  device: 'auto'                  # Device selection ('auto', 'cuda', 'mps', 'cpu')
+  gpu_id: 0                       # GPU device ID to use
+
+# Reproducibility
+seed: 42                          # Random seed for reproducibility
+
+# Advanced Options
+advanced:
+  gradient_checkpointing: false   # Enable gradient checkpointing
+  compile_model: false            # Use torch.compile (PyTorch 2.0+)
+  distributed: false              # Enable distributed training
+  find_unused_parameters: false   # For distributed training
