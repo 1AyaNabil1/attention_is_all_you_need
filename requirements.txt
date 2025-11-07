@@ -62,7 +62,6 @@ tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 tensorflow==2.16.2
 tensorflow-io-gcs-filesystem==0.37.1
-tensorflow-macos==2.16.2
 termcolor==3.1.0
 tokenizers==0.22.1
 torch==2.9.0
