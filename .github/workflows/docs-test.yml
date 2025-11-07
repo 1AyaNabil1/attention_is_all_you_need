@@ -24,8 +24,7 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.1'
-        bundler-cache: true
-        working-directory: docs
+        bundler-cache: false
     
     - name: Verify Jekyll configuration
       run: |
