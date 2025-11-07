@@ -101,7 +101,6 @@ nav a.active {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.5rem;
   padding: 0.4rem 0.8rem;
   display: inline-flex;
   align-items: center;
@@ -112,6 +111,17 @@ nav a.active {
 .theme-toggle:hover {
   transform: scale(1.1);
   opacity: 1;
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-secondary);
+  transition: stroke 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+  stroke: var(--primary);
 }
 
 /* Main Content */
